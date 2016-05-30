@@ -5,3 +5,4 @@ typedef struct Nod {
 	Nod * urmator;
 	Nod* anterior;
 };
+
