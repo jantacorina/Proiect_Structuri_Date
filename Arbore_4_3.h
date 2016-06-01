@@ -28,6 +28,17 @@ void Dezalocare(Arbore* arbore,NodArbore* Nod);
 
 void Printeaza(NodArbore* nod);
 
+int NumarElemente(Arbore* arbore);
+
+int StergereInterna(Arbore* arbore, int index);
+
+int Stergere(Arbore* arbore, int index);
+
+int Inaltime(Arbore * arbore);
+
+
+
+
 
 
 
