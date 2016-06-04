@@ -5,7 +5,7 @@
 *  @pointerPrim - Pointer la primul element din lista
 *  @pointerUltim - Poiner la ultimul element din lista
 **/
-typedef struct Lista {
+struct Lista {
 	Nod * pointerPrim;
 	Nod*  pointerUltim;
 	int size;

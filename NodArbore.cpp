@@ -1,5 +1,16 @@
 #include "NodArbore.h"
 
+void Dezalocare(NodArbore * nod)
+{
+		if (!nod)
+			return;
+		Dezalocare(nod->copii[0]);
+		Dezalocare(nod->copii[1]);
+		Dezalocare(nod->copii[2]);
+		Dezalocare(nod->copii[3]);
+		free(nod);
+}
+
 int InsererazaCheieNod(NodArbore * nod,int key)
 {
 	for (auto i = nod->numarCopii - 1; i >= 0; --i) {
@@ -46,16 +57,21 @@ void TransformareArboreStanga(NodArbore * nod, int ki, int * k, int * index)
 	i = (dest->chei[1] ? 2 : dest->chei[0] ? 1 : 0);
 	dest->chei[i] = nod->chei[ki - 1];
 	nod->chei[ki - 1] = src->chei[0];
-	dest->copii[i + 1] = src->copii[0];   dest->numarElementeCopii[i + 1] = src->numarElementeCopii[0];
+	dest->copii[i + 1] = src->copii[0];  
+	dest->numarElementeCopii[i + 1] = src->numarElementeCopii[0];
 	if (dest->copii[i + 1])
 		dest->copii[i + 1]->parinte = dest;
-	src->copii[0] = src->copii[1];      src->numarElementeCopii[0] = src->numarElementeCopii[1];
+	src->copii[0] = src->copii[1];     
+	src->numarElementeCopii[0] = src->numarElementeCopii[1];
 	src->chei[0] = src->chei[1];
-	src->copii[1] = src->copii[2];      src->numarElementeCopii[1] = src->numarElementeCopii[2];
+	src->copii[1] = src->copii[2];    
+	src->numarElementeCopii[1] = src->numarElementeCopii[2];
 	src->chei[1] = src->chei[2];
-	src->copii[2] = src->copii[3];      src->numarElementeCopii[2] = src->numarElementeCopii[3];
+	src->copii[2] = src->copii[3];     
+	src->numarElementeCopii[2] = src->numarElementeCopii[3];
 	src->chei[2] = 0;
-	src->copii[3] = 0;              src->numarElementeCopii[3] = 0;
+	src->copii[3] = 0;              
+	src->numarElementeCopii[3] = 0;
 	adjust = dest->numarElementeCopii[i + 1] + 1;
 	nod->numarElementeCopii[ki] -= adjust;
 	nod->numarElementeCopii[ki - 1] += adjust;
@@ -168,4 +184,201 @@ void ImbinaArbori(NodArbore * nod, int ki, int * k, int * index)
 	}
 }
 
+int StergeCheie(NodArbore* nod, int index)
+{
+	int cheie = nod->chei[index];
+
+	for (int i = index; i < nod->numarCopii; i++)
+		nod->chei[i] = nod->chei[i + 1];
+
+	--nod->numarCopii;
+	return cheie;
+}
+
+int Intern_Adauga_Arbore(NodArbore * left, int e, NodArbore * right, NodArbore** root, NodArbore*n, int ki)
+{
+	int lcount, rcount;
+	lcount = numarElemente(left);
+	rcount = numarElemente(right);
+	while (n) {
+		if (n->chei[1] == NULL) {
+			/*
+			* Inserarea in stanga unui  nod cu 2 chei
+			*/
+			if (ki == 0) {
+				n->copii[2] = n->copii[1];
+				n->numarElementeCopii[2] = n->numarElementeCopii[1];
+				n->chei[1] = n->chei[0];
+				n->copii[1] = right;
+				n->numarElementeCopii[1] = rcount;
+				n->chei[0] = e;
+				n->copii[0] = left;
+				n->numarElementeCopii[0] = lcount;
+			}
+			else
+			{
+				/*
+				* Inserarea in dreapta unui  nod cu 2 chei
+				*/
+				n->copii[2] = right;
+				n->numarElementeCopii[2] = rcount;
+				n->chei[1] = e;
+				n->copii[1] = left;
+				n->numarElementeCopii[1] = lcount;
+			}
+			if (n->copii[0]) n->copii[0]->parinte = n;
+			if (n->copii[1]) n->copii[1]->parinte = n;
+			if (n->copii[2]) n->copii[2]->parinte = n;
+			break;
+		}
+		else if (n->chei[2] == NULL) {
+			/*
+			* Inserarea int-un nod cu 3 chei
+			*/
+			if (ki == 0) {
+				/*
+				* Inserarea in stanga unui  nod cu 3 chei
+				*/
+				n->copii[3] = n->copii[2];
+				n->numarElementeCopii[3] = n->numarElementeCopii[2];
+				n->chei[2] = n->chei[1];
+				n->copii[2] = n->copii[1];
+				n->numarElementeCopii[2] = n->numarElementeCopii[1];
+				n->chei[1] = n->chei[0];
+				n->copii[1] = right;
+				n->numarElementeCopii[1] = rcount;
+				n->chei[0] = e;
+				n->copii[0] = left;
+				n->numarElementeCopii[0] = lcount;
+			}
+			else if (ki == 1) {
+				/*
+				* Inserarea in mijlocul unui  nod cu 3 chei
+				*/
+				n->copii[3] = n->copii[2];
+				n->numarElementeCopii[3] = n->numarElementeCopii[2];
+				n->chei[2] = n->chei[1];
+				n->copii[2] = right;
+				n->numarElementeCopii[2] = rcount;
+				n->chei[1] = e;
+				n->copii[1] = left;
+				n->numarElementeCopii[1] = lcount;
+			}
+			else { /* ki == 2 */
+				   /*
+				   * Inserarea in dreapta unui  nod cu 3 chei
+				   */
+				n->copii[3] = right;         n->numarElementeCopii[3] = rcount;
+				n->chei[2] = e;
+				n->copii[2] = left;          n->numarElementeCopii[2] = lcount;
+			}
+			if (n->copii[0]) n->copii[0]->parinte = n;
+			if (n->copii[1]) n->copii[1]->parinte = n;
+			if (n->copii[2]) n->copii[2]->parinte = n;
+			if (n->copii[3]) n->copii[3]->parinte = n;
+			break;
+		}
+		else
+		{
+			NodArbore *m = new NodArbore();
+			m->parinte = n->parinte;
+			/*
+			* Impartirea unui nod cu 4 chei ...
+			*;
+			/*
+			* Inserarere intr-un nod cu 4 chei impartirea in doua noduri cu 3/2 chei
+			* si mutarea cu un nivel mai sus
+			*Nu conteaza ordinea in care le asezam
+			*/
+			if (ki == 0)
+			{
+				m->copii[0] = left;          m->numarElementeCopii[0] = lcount;
+				m->chei[0] = e;
+				m->copii[1] = right;         m->numarElementeCopii[1] = rcount;
+				m->chei[1] = n->chei[0];
+				m->copii[2] = n->copii[1];    m->numarElementeCopii[2] = n->numarElementeCopii[1];
+				e = n->chei[1];
+				n->copii[0] = n->copii[2];    n->numarElementeCopii[0] = n->numarElementeCopii[2];
+				n->chei[0] = n->chei[2];
+				n->copii[1] = n->copii[3];    n->numarElementeCopii[1] = n->numarElementeCopii[3];
+			}
+			else if (ki == 1) {
+				m->copii[0] = n->copii[0];    m->numarElementeCopii[0] = n->numarElementeCopii[0];
+				m->chei[0] = n->chei[0];
+				m->copii[1] = left;          m->numarElementeCopii[1] = lcount;
+				m->chei[1] = e;
+				m->copii[2] = right;         m->numarElementeCopii[2] = rcount;
+				e = n->chei[1];
+				n->copii[0] = n->copii[2];    n->numarElementeCopii[0] = n->numarElementeCopii[2];
+				n->chei[0] = n->chei[2];
+				n->copii[1] = n->copii[3];    n->numarElementeCopii[1] = n->numarElementeCopii[3];
+			}
+			else if (ki == 2) {
+				m->copii[0] = n->copii[0];    m->numarElementeCopii[0] = n->numarElementeCopii[0];
+				m->chei[0] = n->chei[0];
+				m->copii[1] = n->copii[1];    m->numarElementeCopii[1] = n->numarElementeCopii[1];
+				m->chei[1] = n->chei[1];
+				m->copii[2] = left;          m->numarElementeCopii[2] = lcount;
+				/* e = e; */
+				n->copii[0] = right;         n->numarElementeCopii[0] = rcount;
+				n->chei[0] = n->chei[2];
+				n->copii[1] = n->copii[3];    n->numarElementeCopii[1] = n->numarElementeCopii[3];
+			}
+			else { /* ki == 3 */
+				m->copii[0] = n->copii[0];    m->numarElementeCopii[0] = n->numarElementeCopii[0];
+				m->chei[0] = n->chei[0];
+				m->copii[1] = n->copii[1];    m->numarElementeCopii[1] = n->numarElementeCopii[1];
+				m->chei[1] = n->chei[1];
+				m->copii[2] = n->copii[2];    m->numarElementeCopii[2] = n->numarElementeCopii[2];
+				n->copii[0] = left;          n->numarElementeCopii[0] = lcount;
+				n->chei[0] = e;
+				n->copii[1] = right;         n->numarElementeCopii[1] = rcount;
+				e = n->chei[2];
+			}
+			m->copii[3] = n->copii[3] = n->copii[2] = NULL;
+			m->numarElementeCopii[3] = n->numarElementeCopii[3] = n->numarElementeCopii[2] = 0;
+			m->chei[2] = n->chei[2] = n->chei[1] = NULL;
+			if (m->copii[0]) m->copii[0]->parinte = m;
+			if (m->copii[1]) m->copii[1]->parinte = m;
+			if (m->copii[2]) m->copii[2]->parinte = m;
+			if (n->copii[0]) n->copii[0]->parinte = n;
+			if (n->copii[1]) n->copii[1]->parinte = n;
+			left = m;  lcount = numarElemente(left);
+			right = n; rcount = numarElemente(right);
+		}
+		if (n->parinte)
+			ki = (n->parinte->copii[0] == n ? 0 :
+				n->parinte->copii[1] == n ? 1 :
+				n->parinte->copii[2] == n ? 2 : 3);
+		n = n->parinte;
+	}
+	if (n) {
+		while (n->parinte) {
+			int count = numarElemente(n);
+			int childnum;
+			childnum = (n->parinte->copii[0] == n ? 0 :
+				n->parinte->copii[1] == n ? 1 :
+				n->parinte->copii[2] == n ? 2 : 3);
+			n->parinte->numarElementeCopii[childnum] = count;
+			n = n->parinte;
+		}
+		return 0;
+	}
+	else
+	{
+		(*root) = new(NodArbore);
+		(*root)->copii[0] = left;     (*root)->numarElementeCopii[0] = lcount;
+		(*root)->chei[0] = e;
+		(*root)->copii[1] = right;    (*root)->numarElementeCopii[1] = rcount;
+		(*root)->chei[1] = NULL;
+		(*root)->copii[2] = NULL;     (*root)->numarElementeCopii[2] = 0;
+		(*root)->chei[2] = NULL;
+		(*root)->copii[3] = NULL;     (*root)->numarElementeCopii[3] = 0;
+		(*root)->parinte = NULL;
+		if ((*root)->copii[0]) (*root)->copii[0]->parinte = (*root);
+		if ((*root)->copii[1]) (*root)->copii[1]->parinte = (*root);
+
+		return 1;
+	}
+}
 

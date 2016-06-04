@@ -4,54 +4,22 @@
 Arbore*  Initializare()
 {
 	Arbore * arbore = (Arbore*)malloc(sizeof(Arbore));
-	arbore->Radacina = InitializeazaNod();
-	arbore->lungime = 0;
+	arbore->Radacina = NULL;
+	arbore->comparare = NULL;
 	return arbore;
 }
-
-NodArbore* InsereazaInFata(Arbore* arbore, int element)
+void Dezalocare(Arbore* arbore)
 {
-	NodArbore * temporar;
-	temporar = InitializeazaNod();
-	if (arbore->Radacina->numarCopii == 3)
-	{
-		temporar->copii[0] = arbore->Radacina;
-		temporar->esteFrunza = 0;
-		arbore->Radacina = temporar;
-		ImparteArbore(temporar, 0);
-		return Insereaza(arbore, temporar, element);
-	}
-	else
-	{
-		return Insereaza(arbore, arbore->Radacina, element);
-	}
+	Dezalocare(arbore->Radacina);
+	free(arbore);
 }
 
-NodArbore* Insereaza(Arbore* arbore, NodArbore* nod, int element)
+int numarElemente(Arbore* arbore)
 {
-	int i = 0;
-	while (i < nod->numarCopii && element > nod->chei[i])
-		i++;
-	if (nod->esteFrunza)
-	{
-		int j;
-		for (j = nod->numarCopii; j > i; j--)
-			nod->chei[j] = nod->chei[j - 1];
-		nod->chei[j] = element;
-		nod->numarCopii++;
-		arbore->lungime++;
-		return nod;
-	}
+	if (arbore->Radacina)
+		return numarElemente(arbore->Radacina);
 	else
-	{
-		if (nod->copii[i]->numarCopii == 3)
-		{
-			ImparteArbore(nod, i);
-			if (element > nod->chei[i])
-				i++;
-		}
-	}
-	return Insereaza(arbore, nod->copii[i], element);
+		return 0;
 }
 
 void ImparteArbore(NodArbore* nod, int pozitie)
@@ -94,27 +62,36 @@ void ImparteArbore(NodArbore* nod, int pozitie)
 	}
 }
 
-NodArbore* Cauta(NodArbore* nod, int element)
+int Index(Arbore* arbore, int index)
 {
-	if (nod->esteFrunza)
-		return nod;
-	int i = 0;
-	while (i< nod->numarCopii && element > nod->chei[i])
-		i++;
-	if (element == nod->chei[i])
-		return nod;
-	else
-		return Cauta(nod->copii[i], element);
-}
+	NodArbore *n;
 
-int Lungime(Arbore* arbore)
-{
-	if (arbore == NULL)
-		return -1;
-	else
-		return arbore->lungime;
-}
+	if (!arbore->Radacina)
+		return NULL;		       /* tree is empty */
 
+	if (index < 0 || index >= numarElemente(arbore->Radacina))
+		return NULL;		       /* out of range */
+
+	n = arbore->Radacina;
+
+	while (n) {
+		if (index < n->numarElementeCopii[0])
+			n = n->copii[0];
+		else if (index -= n->numarElementeCopii[0] + 1, index < 0)
+			return n->chei[0];
+		else if (index < n->numarElementeCopii[1])
+			n = n->copii[1];
+		else if (index -= n->numarElementeCopii[1] + 1, index < 0)
+			return n->chei[1];
+		else if (index < n->numarElementeCopii[2])
+			n = n->copii[2];
+		else if (index -= n->numarElementeCopii[2] + 1, index < 0)
+			return n->chei[2];
+		else
+			n = n->copii[3];
+	}
+	return NULL;
+}
 NodArbore* InitializeazaNod()
 {
 	NodArbore * temporar = (NodArbore*)malloc(sizeof(NodArbore));
@@ -167,7 +144,7 @@ int NumarElemente(Arbore * arbore)
 		return 0;
 }
 
-int  StergereInterna(Arbore * arbore, int index)
+int StergereInterna(Arbore * arbore, int index)
 {
 	NodArbore *n;
 	void* retval;
@@ -261,4 +238,79 @@ int Inaltime(Arbore * arbore)
 		n = n->copii[0];
 	}
 	return level;
+}
+
+int Adauga_Arbore(Arbore* arbore, int e)
+{
+	if (arbore->comparare == NULL)
+		return NULL;
+	return Adauga_Arbore(arbore, e, -1);
+}
+
+int Adauga_Arbore(Arbore* arbore, int e, int index)
+{
+	NodArbore *n;
+	int ki;
+	int orig_e = e;
+	int c;
+
+	if (arbore->Radacina == NULL) 
+	{
+		arbore->Radacina = new(NodArbore);
+		arbore->Radacina->chei[1] = arbore->Radacina->chei[2] = NULL;
+		arbore->Radacina->copii[0] = arbore->Radacina->copii[1] = NULL;
+		arbore->Radacina->copii[2] = arbore->Radacina->copii[3] = NULL;
+		arbore->Radacina->numarElementeCopii[0] = arbore->Radacina->numarElementeCopii[1] = 0;
+		arbore->Radacina->numarElementeCopii[2] = arbore->Radacina->numarElementeCopii[3] = 0;
+		arbore->Radacina->parinte = NULL;
+		arbore->Radacina->chei[0] = e;
+		return orig_e;
+	}
+
+	n = arbore->Radacina;
+	while (n) {
+		if (index >= 0) {
+			if (!n->copii[0]) {
+				ki = index;
+			}
+			else {
+				if (index <= n->numarElementeCopii[0]) {
+					ki = 0;
+				}
+				else if (index -= n->numarElementeCopii[0] + 1, index <= n->numarElementeCopii[1]) {
+					ki = 1;
+				}
+				else if (index -= n->numarElementeCopii[1] + 1, index <= n->numarElementeCopii[2]) {
+					ki = 2;
+				}
+				else if (index -= n->numarElementeCopii[2] + 1, index <= n->numarElementeCopii[3]) {
+					ki = 3;
+				}
+				else
+					return NULL;       /* error: index out of range */
+			}
+		}
+		else {
+			if ((c = arbore->comparare(e, n->chei[0])) < 0)
+				ki = 0;
+			else if (c == 0)
+				return n->chei[0];	       /* already exists */
+			else if (n->chei[1] == NULL || (c = arbore->comparare(e, n->chei[1])) < 0)
+				ki = 1;
+			else if (c == 0)
+				return n->chei[1];	       /* already exists */
+			else if (n->chei[2] == NULL || (c = arbore->comparare(e, n->chei[2])) < 0)
+				ki = 2;
+			else if (c == 0)
+				return n->chei[2];	       /* already exists */
+			else
+				ki = 3;
+		}
+		if (!n->copii[ki])
+			break;
+		n = n->copii[ki];
+	}
+
+	Intern_Adauga_Arbore(NULL, e, NULL, &arbore->Radacina, n, ki);
+	return orig_e;
 }

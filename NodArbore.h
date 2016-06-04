@@ -1,30 +1,22 @@
 #pragma once
 #include <stdio.h>
 #include <stdlib.h>
-typedef struct NodArbore {
+struct NodArbore {
 	int numarCopii;
 	int chei[3];
 	NodArbore * copii[4];
 	int numarElementeCopii[4];
 	int esteFrunza;
 	NodArbore* parinte;
-
 };
 
 int InsererazaCheieNod(NodArbore* nod,int key);
 
-int StergeCheie(NodArbore* nod, int index)
-{
-	int cheie = nod->chei[index];
-
-	for (int i = index; i < nod->numarCopii; i++)
-		nod->chei[i] = nod->chei[i + 1];
-
-	--nod->numarCopii;
-	return cheie;
-}
+int StergeCheie(NodArbore* nod, int index);
 
 int numarElemente(NodArbore*nod);
+
+int Intern_Adauga_Arbore(NodArbore * left, int e, NodArbore * right, NodArbore** root, NodArbore*n, int ki);
 
 /**
 *  Transformarea arborelui folosita la stergere.Muta subarborele din stanga
@@ -44,3 +36,5 @@ void TransformareArboreDreapta(NodArbore * nod, int ki, int *k, int*index);
 void ImbinaArbori(NodArbore * nod, int ki, int *k, int*index);
 
 
+
+void Dezalocare(NodArbore * nod);
