@@ -1,4 +1,5 @@
 #include "NodArbore.h"
+#include "alloc.h"
 
 void Dezalocare(NodArbore * nod)
 {
@@ -280,7 +281,7 @@ int Intern_Adauga_Arbore(NodArbore * left, int e, NodArbore * right, NodArbore**
 		}
 		else
 		{
-			NodArbore *m = new NodArbore();
+			NodArbore *m = my_new(NodArbore);
 			m->parinte = n->parinte;
 			/*
 			* Impartirea unui nod cu 4 chei ...
@@ -366,7 +367,7 @@ int Intern_Adauga_Arbore(NodArbore * left, int e, NodArbore * right, NodArbore**
 	}
 	else
 	{
-		(*root) = new(NodArbore);
+		(*root) = my_new(NodArbore);
 		(*root)->copii[0] = left;     (*root)->numarElementeCopii[0] = lcount;
 		(*root)->chei[0] = e;
 		(*root)->copii[1] = right;    (*root)->numarElementeCopii[1] = rcount;

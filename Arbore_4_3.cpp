@@ -1,17 +1,17 @@
 #include "Arbore_4_3.h"
 
 
-Arbore*  Initializare()
+Arbore*  Initializare(pFunctieComparare pCompare)
 {
-	Arbore * arbore = (Arbore*)malloc(sizeof(Arbore));
+	Arbore * arbore = my_new(Arbore);
 	arbore->Radacina = NULL;
-	arbore->comparare = NULL;
+	arbore->comparare = pCompare;
 	return arbore;
 }
 void Dezalocare(Arbore* arbore)
 {
 	Dezalocare(arbore->Radacina);
-	free(arbore);
+	my_free(arbore);
 }
 
 int numarElemente(Arbore* arbore)
@@ -144,7 +144,7 @@ int NumarElemente(Arbore * arbore)
 		return 0;
 }
 
-int StergereInterna(Arbore * arbore, int index)
+int StergereElement(Arbore * arbore, int index)
 {
 	NodArbore *n;
 	void* retval;
@@ -222,11 +222,12 @@ int StergereInterna(Arbore * arbore, int index)
 	return retValInt;
 }
 
-int Stergere(Arbore * arbore, int index)
+int StergereIndex(Arbore * arbore, int index)
 {
-	if (index < 0 || numarElemente(arbore->Radacina))
+	int size = numarElemente(arbore->Radacina);
+	if (index < 0 || index >=size )
 		return NULL;
-	return StergereInterna(arbore, index);
+	return StergereElement(arbore, index);
 }
 
 int Inaltime(Arbore * arbore)
@@ -256,7 +257,7 @@ int Adauga_Arbore(Arbore* arbore, int e, int index)
 
 	if (arbore->Radacina == NULL) 
 	{
-		arbore->Radacina = new(NodArbore);
+		arbore->Radacina = my_new(NodArbore);
 		arbore->Radacina->chei[1] = arbore->Radacina->chei[2] = NULL;
 		arbore->Radacina->copii[0] = arbore->Radacina->copii[1] = NULL;
 		arbore->Radacina->copii[2] = arbore->Radacina->copii[3] = NULL;

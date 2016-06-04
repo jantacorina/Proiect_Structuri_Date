@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "NodArbore.h"
+#include "alloc.h"
 
 typedef int(*pFunctieComparare)(int, int);
 
@@ -11,7 +12,7 @@ typedef struct Arbore_4_3 {
 	pFunctieComparare comparare;
 }Arbore;
 
-Arbore*  Initializare();
+Arbore*  Initializare(pFunctieComparare);
 
 void Dezalocare(Arbore* arbore);
 
@@ -29,9 +30,9 @@ NodArbore* InitializeazaNod();
 
 void Printeaza(NodArbore* nod);
 
-int StergereInterna(Arbore* arbore, int index);
+int StergereElement(Arbore* arbore, int index);
 
-int Stergere(Arbore* arbore, int index);
+int StergereIndex(Arbore * arbore, int index);
 
 
 

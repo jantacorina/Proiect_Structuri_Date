@@ -3,7 +3,7 @@
 void init(Queap * queap)
 {
 	Initializare(queap->lista_inlantuita);
-	queap->queap_arbore = Initializare();
+//	queap->queap_arbore = Initializare();
 }
 
 void Insert(Queap * queap, int element)
