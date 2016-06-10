@@ -3,14 +3,15 @@
 #include <stdlib.h>
 
 
-void Initializare(Lista* pLista)
+void Initializare(Lista** pLista)
 {
 	// aloc un element de 
-	pLista = (Lista*)calloc(1, sizeof(pLista));
-	pLista->size = 0;
+	*pLista = my_new(Lista);
+	(*pLista)->size = 0;
+	(*pLista)->pointerPrim = (*pLista)->pointerUltim = NULL;
 }
 
-void Inserare(Lista* pLista, int element)
+void Inserare(Lista* pLista, Element* element)
 {
 	if (pLista == NULL)
 	{
@@ -63,4 +64,16 @@ int Lungime(Lista * pLista)
 	if (pLista == NULL)
 		return -1;
 	return pLista->size;
+}
+
+void Clean(Lista * pLista)
+{
+	Nod * pNod = pLista->pointerPrim;
+	Nod * pTemp = pNod;
+	while (pNod != NULL)
+	{
+		pTemp = pNod->urmator;
+		free(pNod);
+		pNod = pTemp;
+	}
 }

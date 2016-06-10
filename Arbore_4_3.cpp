@@ -1,13 +1,16 @@
 #include "Arbore_4_3.h"
 
-
+#define INFINIT 100000
 Arbore*  Initializare(pFunctieComparare pCompare)
 {
 	Arbore * arbore = my_new(Arbore);
+	arbore->minimum = my_new(Element);
+	arbore->minimum->value = INFINIT;
 	arbore->Radacina = NULL;
 	arbore->comparare = pCompare;
 	return arbore;
 }
+
 void Dezalocare(Arbore* arbore)
 {
 	Dezalocare(arbore->Radacina);
@@ -62,15 +65,15 @@ void ImparteArbore(NodArbore* nod, int pozitie)
 	}
 }
 
-int Index(Arbore* arbore, int index)
+Element* Index(Arbore* arbore, int index)
 {
 	NodArbore *n;
 
 	if (!arbore->Radacina)
-		return NULL;		       /* tree is empty */
+		return NULL;
 
 	if (index < 0 || index >= numarElemente(arbore->Radacina))
-		return NULL;		       /* out of range */
+		return NULL;
 
 	n = arbore->Radacina;
 
@@ -92,6 +95,7 @@ int Index(Arbore* arbore, int index)
 	}
 	return NULL;
 }
+
 NodArbore* InitializeazaNod()
 {
 	NodArbore * temporar = (NodArbore*)malloc(sizeof(NodArbore));
@@ -107,7 +111,7 @@ NodArbore* InitializeazaNod()
 	return temporar;
 }
 
-void Dezalocare(Arbore* arbore,NodArbore* Nod)
+void Dezalocare(Arbore* arbore, NodArbore* Nod)
 {
 	if (arbore->Radacina == NULL)
 		return;
@@ -144,118 +148,342 @@ int NumarElemente(Arbore * arbore)
 		return 0;
 }
 
-int StergereElement(Arbore * arbore, int index)
+Element* StergereElementIntern(Arbore * arbore, int index)
 {
 	NodArbore *n;
-	void* retval;
-	int retValInt;
-	int ki, i;
-	retval = NULL;
+	Element* retval = my_new(Element);
+	int ei = -1;
+
+	retval->value = 0;
+
 	n = arbore->Radacina;
-	while (1) 
-	{
-		NodArbore *sub;
-		if (index <= n->numarElementeCopii[0]) {
-			ki = 0;
-		}
-		else if (index -= n->numarElementeCopii[0] + 1, index <= n->numarElementeCopii[1]) {
-			ki = 1;
-		}
-		else if (index -= n->numarElementeCopii[1] + 1, index <= n->numarElementeCopii[2]) {
-			ki = 2;
-		}
-		else if (index -= n->numarElementeCopii[2] + 1, index <= n->numarElementeCopii[3]) {
-			ki = 3;
-		}
-		else {
-			exit(1);
-		}
-		if (!n->copii[0])
-			break;
-		// verificam daca am gasit nodul tinta.Daca da alegem o alta tinta 
-		if (index == n->numarElementeCopii[ki]) {
-			NodArbore *m;
-			ki++; index = 0;
-			for (m = n->copii[ki]; m->copii[0]; m = m->copii[0])
-				continue;
-			retval = n->copii[ki - 1];
-			n->chei[ki - 1] = m->chei[0];
-		}
-		sub = n->copii[ki];
-		if (!sub->chei[1]) {
-			if (ki > 0 && n->copii[ki - 1]->chei[1])
-				TransformareArboreDreapta(n, ki - 1, &ki, &index);
-		}
-		else if (ki < 3 && n->copii[ki + 1] &&
-			n->copii[ki + 1]->chei[1]) {
-			/*
-			*Copilul ki are un singur element dar ki+1 are cel putin 2 copii.Muta arborele ki+1 sub ki
-			*/
-			TransformareArboreStanga(n, ki + 1, &ki, &index);
-		}
-		else {
-			ImbinaArbori(n, ki > 0 ? ki - 1 : ki, &ki, &index);
-			sub = n->copii[ki];
-
-			if (!n->chei[0]) {
-				arbore->Radacina = sub;
-				sub->parinte = NULL;
-				free(n);
-				n = NULL;
+	while (1) {
+		while (n) {
+			int ki;
+			NodArbore *sub;
+			if (index < n->numarElementeCopii[0]) {
+				ki = 0;
 			}
+			else if (index -= n->numarElementeCopii[0] + 1, index < 0) {
+				ei = 0;
+				break;
+			}
+			else if (index < n->numarElementeCopii[1]) {
+				ki = 1;
+			}
+			else if (index -= n->numarElementeCopii[1] + 1, index < 0) {
+				ei = 1;
+				break;
+			}
+			else if (index < n->numarElementeCopii[2]) {
+				ki = 2;
+			}
+			else if (index -= n->numarElementeCopii[2] + 1, index < 0) {
+				ei = 2;
+				break;
+			}
+			else {
+				ki = 3;
+			}
+			sub = n->copii[ki];
+			if (!sub->chei[1]) {
+				if (ki > 0 && n->copii[ki - 1]->chei[1]) {
+					NodArbore *sib = n->copii[ki - 1];
+					int lastelem = (sib->chei[2] ? 2 :
+						sib->chei[1] ? 1 : 0);
+					sub->copii[2] = sub->copii[1];
+					sub->numarElementeCopii[2] = sub->numarElementeCopii[1];
+					sub->chei[1] = sub->chei[0];
+					sub->copii[1] = sub->copii[0];
+					sub->numarElementeCopii[1] = sub->numarElementeCopii[0];
+					sub->chei[0] = n->chei[ki - 1];
+					sub->copii[0] = sib->copii[lastelem + 1];
+					sub->numarElementeCopii[0] = sib->numarElementeCopii[lastelem + 1];
+					if (sub->copii[0])
+						sub->copii[0]->parinte = sub;
+					n->chei[ki - 1] = sib->chei[lastelem];
+					sib->copii[lastelem + 1] = NULL;
+					sib->numarElementeCopii[lastelem + 1] = 0;
+					sib->chei[lastelem] = NULL;
+					n->numarElementeCopii[ki] = numarElemente(sub);
+					index += n->numarElementeCopii[ki - 1];
+					n->numarElementeCopii[ki - 1] = numarElemente(sib);
+					index -= n->numarElementeCopii[ki - 1];
+				}
+				else if (ki < 3 && n->copii[ki + 1]
+					&& n->copii[ki + 1]->chei[1]) {
+					NodArbore *sib = n->copii[ki + 1];
+					int j;
+					sub->chei[1] = n->chei[ki];
+					sub->copii[2] = sib->copii[0];
+					sub->numarElementeCopii[2] = sib->numarElementeCopii[0];
+					if (sub->copii[2])
+						sub->copii[2]->parinte = sub;
+					n->chei[ki] = sib->chei[0];
+					sib->copii[0] = sib->copii[1];
+					sib->numarElementeCopii[0] = sib->numarElementeCopii[1];
+					for (j = 0; j < 2 && sib->chei[j + 1]; j++) {
+						sib->copii[j + 1] = sib->copii[j + 2];
+						sib->numarElementeCopii[j + 1] = sib->numarElementeCopii[j + 2];
+						sib->chei[j] = sib->chei[j + 1];
+					}
+					sib->copii[j + 1] = NULL;
+					sib->numarElementeCopii[j + 1] = 0;
+					sib->chei[j] = NULL;
+					n->numarElementeCopii[ki] = numarElemente(sub);
+					n->numarElementeCopii[ki + 1] = numarElemente(sib);
+				}
+				else {
+					NodArbore *sib;
+					int j;
+
+					if (ki > 0) {
+						ki--;
+						index += n->numarElementeCopii[ki] + 1;
+					}
+					sib = n->copii[ki];
+					sub = n->copii[ki + 1];
+
+					sub->copii[3] = sub->copii[1];
+					sub->numarElementeCopii[3] = sub->numarElementeCopii[1];
+					sub->chei[2] = sub->chei[0];
+					sub->copii[2] = sub->copii[0];
+					sub->numarElementeCopii[2] = sub->numarElementeCopii[0];
+					sub->chei[1] = n->chei[ki];
+					sub->copii[1] = sib->copii[1];
+					sub->numarElementeCopii[1] = sib->numarElementeCopii[1];
+					if (sub->copii[1])
+						sub->copii[1]->parinte = sub;
+					sub->chei[0] = sib->chei[0];
+					sub->copii[0] = sib->copii[0];
+					sub->numarElementeCopii[0] = sib->numarElementeCopii[0];
+					if (sub->copii[0])
+						sub->copii[0]->parinte = sub;
+					n->numarElementeCopii[ki + 1] = numarElemente(sub);
+					my_free(sib);
+					for (j = ki; j < 3 && n->copii[j + 1]; j++) {
+						n->copii[j] = n->copii[j + 1];
+						n->numarElementeCopii[j] = n->numarElementeCopii[j + 1];
+						n->chei[j] = j < 2 ? n->chei[j + 1] : NULL;
+					}
+					n->copii[j] = NULL;
+					n->numarElementeCopii[j] = 0;
+					if (j < 3)
+						n->chei[j] = NULL;
+
+					if (!n->chei[0]) {
+						arbore->Radacina = sub;
+						sub->parinte = NULL;
+						my_free(n);
+					}
+				}
+			}
+			n = sub;
 		}
-		if (n)
-			n->numarElementeCopii[ki]--;
-		n = sub;
-	}
-	if(!retval)
-		retValInt = n->chei[ki];
+		if (!retval)
+			retval = n->chei[ei];
 
-	for (i = ki; i < 2 && n->chei[i + 1]; i++)
-		n->chei[i] = n->chei[i + 1];
-	n->chei[i] = NULL;
+		if (ei == -1)
+			return NULL;
+		if (!n->parinte && !n->chei[1] && !n->copii[0]) {
+			my_free(n);
+			arbore->Radacina = NULL;
+			return retval;
+		}
+		if (!n->copii[0] && n->chei[1]) {
+			int i;
+			for (i = ei; i < 2 && n->chei[i + 1]; i++)
+				n->chei[i] = n->chei[i + 1];
+			n->chei[i] = NULL;
+			while (n->parinte) {
+				int childnum;
+				childnum = (n->parinte->copii[0] == n ? 0 :
+					n->parinte->copii[1] == n ? 1 :
+					n->parinte->copii[2] == n ? 2 : 3);
+				n->parinte->numarElementeCopii[childnum]--;
+				n = n->parinte;
+			}
+			return retval;
+		}
+		else if (n->copii[ei]->chei[1]) {
+			NodArbore *m = n->copii[ei];
+			Element* target = my_new(Element);
+			while (m->copii[0]) {
+				m = (m->copii[3] ? m->copii[3] :
+					m->copii[2] ? m->copii[2] :
+					m->copii[1] ? m->copii[1] : m->copii[0]);
+			}
+			target = (m->chei[2] ? m->chei[2] :
+				m->chei[1] ? m->chei[1] : m->chei[0]);
+			n->chei[ei] = target;
+			index = n->numarElementeCopii[ei] - 1;
+			n = n->copii[ei];
+		}
+		else if (n->copii[ei + 1]->chei[1]) {
 
-	if (!n->chei[0]) {
-		free(n);
-		arbore->Radacina = NULL;
+			NodArbore *m = n->copii[ei + 1];
+			Element* target = my_new(Element);;
+			while (m->copii[0]) {
+				m = m->copii[0];
+			}
+			target = m->chei[0];
+			n->chei[ei] = target;
+			n = n->copii[ei + 1];
+			index = 0;
+		}
+		else {
+			NodArbore *a = n->copii[ei], *b = n->copii[ei + 1];
+			int j;
+			a->chei[1] = n->chei[ei];
+			a->copii[2] = b->copii[0];
+			a->numarElementeCopii[2] = b->numarElementeCopii[0];
+			if (a->copii[2])
+				a->copii[2]->parinte = a;
+			a->chei[2] = b->chei[0];
+			a->copii[3] = b->copii[1];
+			a->numarElementeCopii[3] = b->numarElementeCopii[1];
+			if (a->copii[3])
+				a->copii[3]->parinte = a;
+			my_free(b);
+			n->numarElementeCopii[ei] = numarElemente(a);
+			for (j = ei; j < 2 && n->chei[j + 1]; j++) {
+				n->chei[j] = n->chei[j + 1];
+				n->copii[j + 1] = n->copii[j + 2];
+				n->numarElementeCopii[j + 1] = n->numarElementeCopii[j + 2];
+			}
+			n->chei[j] = NULL;
+			n->copii[j + 1] = NULL;
+			n->numarElementeCopii[j + 1] = 0;
+
+			if (n->chei[0] == NULL) {
+				arbore->Radacina = a;
+				a->parinte = NULL;
+				my_free(n);
+			}
+			n = a;
+			index = a->numarElementeCopii[0] + a->numarElementeCopii[1] + 1;
+		}
 	}
-	return retValInt;
 }
 
-int StergereIndex(Arbore * arbore, int index)
+Element* StergereIndex(Arbore * arbore, int index)
 {
 	int size = numarElemente(arbore->Radacina);
-	if (index < 0 || index >=size )
+	if (index < 0 || index >= size)
 		return NULL;
-	return StergereElement(arbore, index);
+	return StergereElementIntern(arbore, index);
 }
 
-int Inaltime(Arbore * arbore)
+Element* Cauta(Arbore * arbore, Element* element, pFunctieComparare comparare, Relation relatie, int * index)
 {
-	int level = 0;
-	NodArbore *n = arbore->Radacina;
-	while (n) {
-		level++;
-		n = n->copii[0];
+	NodArbore *n;
+	Element* ret = my_new(Element);
+	int c;
+	int idx, ecount, kcount, cmpret;
+
+	if (arbore->Radacina == NULL)
+		return NULL;
+
+	if (comparare == NULL)
+		comparare = arbore->comparare;
+
+	n = arbore->Radacina;
+	idx = 0;
+	ecount = -1;
+	cmpret = 0;
+	if (element == NULL)
+	{
+		if (relatie == Relation::LESS)
+			cmpret = +1;
+		else if (relatie == Relation::GREATER)
+			cmpret = -1;
 	}
-	return level;
+	while (1)
+	{
+		for (kcount = 0; kcount < 4; kcount++) {
+			if (kcount >= 3 || n->chei[kcount] == NULL ||
+				(c = cmpret ? cmpret : comparare(element->value, n->chei[kcount]->value)) < 0)
+			{
+				break;
+			}
+			if (n->copii[kcount]) 
+				idx += n->numarElementeCopii[kcount];
+			if (c == 0) {
+				ecount = kcount;
+				break;
+			}
+			idx++;
+		}
+		if (ecount >= 0)
+			break;
+		if (n->copii[kcount])
+			n = n->copii[kcount];
+		else
+			break;
+	}
+
+	if (ecount >= 0) {
+		if (relatie != Relation::LESS && relatie != Relation::GREATER) {
+			if (index) *index = idx;
+			return n->chei[ecount];
+		}
+		if (relatie == Relation::LESS)
+			idx--;
+		else
+			idx++;
+	}
+	else {
+		if (relatie == Relation::EQUAL)
+			return NULL;
+		if (relatie == LESS || relatie == LESS_EQUAL) {
+			idx--;
+		}
+	}
+	ret = Index(arbore, idx);
+	if (ret && index) *index = idx;
+	return ret;
 }
 
-int Adauga_Arbore(Arbore* arbore, int e)
+Element* StergeElement(Arbore * arbore, Element* element)
+{
+	int index;
+
+	Element * elm = Cauta(arbore, element, NULL, Relation::GREATER_EQUAL, &index);
+	if (!elm)
+		return NULL;
+	if (elm->value == arbore->minimum->value)
+	{
+		elm = StergereElementIntern(arbore, index);
+		Element *inf = my_new(Element);
+		inf->value = INFINIT;
+		arbore->minimum = minim(arbore->Radacina,inf);
+	}
+	else
+	{
+		elm = StergereElementIntern(arbore, index);
+	}
+	 return elm;
+
+}
+
+Element* Adauga_Arbore(Arbore* arbore, Element* e)
 {
 	if (arbore->comparare == NULL)
 		return NULL;
 	return Adauga_Arbore(arbore, e, -1);
 }
 
-int Adauga_Arbore(Arbore* arbore, int e, int index)
+Element* Adauga_Arbore(Arbore* arbore, Element* e, int index)
 {
 	NodArbore *n;
 	int ki;
-	int orig_e = e;
+	Element* orig_e = e;
 	int c;
-
-	if (arbore->Radacina == NULL) 
+	if (Compara(arbore->minimum, e) > 0)
+	{
+		arbore->minimum = e;
+	}
+	if (arbore->Radacina == NULL)
 	{
 		arbore->Radacina = my_new(NodArbore);
 		arbore->Radacina->chei[1] = arbore->Radacina->chei[2] = NULL;
@@ -265,6 +493,7 @@ int Adauga_Arbore(Arbore* arbore, int e, int index)
 		arbore->Radacina->numarElementeCopii[2] = arbore->Radacina->numarElementeCopii[3] = 0;
 		arbore->Radacina->parinte = NULL;
 		arbore->Radacina->chei[0] = e;
+		arbore->Radacina->min = arbore->Radacina; // root contains the minimum
 		return orig_e;
 	}
 
@@ -288,22 +517,22 @@ int Adauga_Arbore(Arbore* arbore, int e, int index)
 					ki = 3;
 				}
 				else
-					return NULL;       /* error: index out of range */
+					return NULL;
 			}
 		}
 		else {
-			if ((c = arbore->comparare(e, n->chei[0])) < 0)
+			if ((c = arbore->comparare(e->value, n->chei[0]->value)) < 0)
 				ki = 0;
 			else if (c == 0)
-				return n->chei[0];	       /* already exists */
-			else if (n->chei[1] == NULL || (c = arbore->comparare(e, n->chei[1])) < 0)
+				return n->chei[0];
+			else if (n->chei[1] == NULL || (c = arbore->comparare(e->value, n->chei[1]->value)) < 0)
 				ki = 1;
 			else if (c == 0)
-				return n->chei[1];	       /* already exists */
-			else if (n->chei[2] == NULL || (c = arbore->comparare(e, n->chei[2])) < 0)
+				return n->chei[1];
+			else if (n->chei[2] == NULL || (c = arbore->comparare(e->value, n->chei[2]->value)) < 0)
 				ki = 2;
 			else if (c == 0)
-				return n->chei[2];	       /* already exists */
+				return n->chei[2];
 			else
 				ki = 3;
 		}
@@ -311,7 +540,17 @@ int Adauga_Arbore(Arbore* arbore, int e, int index)
 			break;
 		n = n->copii[ki];
 	}
-
 	Intern_Adauga_Arbore(NULL, e, NULL, &arbore->Radacina, n, ki);
 	return orig_e;
+}
+
+int Inaltime(Arbore* arbore)
+{
+	int level = 0;
+	NodArbore *n = arbore->Radacina;
+	while (n) {
+		level++;
+		n = n->copii[0];
+	}
+	return level;
 }

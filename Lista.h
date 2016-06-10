@@ -1,5 +1,5 @@
 #pragma once
-#include "Nod.h"
+#include "NodArbore.h"
 /**
 *  Structura de tip Lista.
 *  @pointerPrim - Pointer la primul element din lista
@@ -14,14 +14,14 @@ struct Lista {
 	Initializez lista
 	@pLista pointer la lista care urmeaza sa fie initializata
 **/
-void Initializare(Lista* pLista);
+void Initializare(Lista** pLista);
 
 /***
 * Insereaza element in lista inlantuita
 *  @pLista - Pointer la elementul ce urmmeaza sa fie inserat
 *  @element - Elementul care urmeaza sa fie inserat
 **/
-void Inserare(Lista* pLista, int element);
+void Inserare(Lista* pLista, Element* element);
 
 /***
 * Sterge un elemnt din lista inlantuita
@@ -38,3 +38,11 @@ int Stergere(Lista* pLista, Nod* nod);
 * @return  - returneaza numarul de elemente dinn lista inlantuita
 **/
 int Lungime(Lista * pLista);
+
+
+/***
+*Dezaloca intreaga lista
+* @pLista  - Pointer la lista 
+**/
+void Clean(Lista * pLista);
+

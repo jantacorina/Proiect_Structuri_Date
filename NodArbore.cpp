@@ -1,6 +1,7 @@
 #include "NodArbore.h"
 #include "alloc.h"
 
+#define INFINIT 100000
 void Dezalocare(NodArbore * nod)
 {
 		if (!nod)
@@ -12,7 +13,7 @@ void Dezalocare(NodArbore * nod)
 		free(nod);
 }
 
-int InsererazaCheieNod(NodArbore * nod,int key)
+int InsererazaCheieNod(NodArbore * nod,Element* key)
 {
 	for (auto i = nod->numarCopii - 1; i >= 0; --i) {
 
@@ -185,9 +186,9 @@ void ImbinaArbori(NodArbore * nod, int ki, int * k, int * index)
 	}
 }
 
-int StergeCheie(NodArbore* nod, int index)
+Element* StergeCheie(NodArbore* nod, int index)
 {
-	int cheie = nod->chei[index];
+	Element* cheie = nod->chei[index];
 
 	for (int i = index; i < nod->numarCopii; i++)
 		nod->chei[i] = nod->chei[i + 1];
@@ -196,13 +197,14 @@ int StergeCheie(NodArbore* nod, int index)
 	return cheie;
 }
 
-int Intern_Adauga_Arbore(NodArbore * left, int e, NodArbore * right, NodArbore** root, NodArbore*n, int ki)
+int Intern_Adauga_Arbore(NodArbore * left, Element* e, NodArbore * right, NodArbore** root, NodArbore*n, int ki)
 {
 	int lcount, rcount;
 	lcount = numarElemente(left);
 	rcount = numarElemente(right);
 	while (n) {
-		if (n->chei[1] == NULL) {
+		if (n->chei[1] == NULL) 
+		{
 			/*
 			* Inserarea in stanga unui  nod cu 2 chei
 			*/
@@ -353,7 +355,8 @@ int Intern_Adauga_Arbore(NodArbore * left, int e, NodArbore * right, NodArbore**
 				n->parinte->copii[2] == n ? 2 : 3);
 		n = n->parinte;
 	}
-	if (n) {
+	if (n) 
+	{
 		while (n->parinte) {
 			int count = numarElemente(n);
 			int childnum;
@@ -383,3 +386,27 @@ int Intern_Adauga_Arbore(NodArbore * left, int e, NodArbore * right, NodArbore**
 	}
 }
 
+Element* minim(NodArbore* nod,Element* oldMin)
+{
+	int i;
+	if (nod == 0)
+		return oldMin;
+	for (i = 0; i < 3; i++)
+	{
+		if (nod->chei[i] != nullptr)
+		{
+			if (nod->chei[i]->value < oldMin->value)
+			{
+				oldMin = nod->chei[i];
+			}
+		}
+	}
+	for (i = 0; i < 4; i++)
+	{
+		Element* left =  minim(nod->copii[i],oldMin);
+		if (left->value < oldMin->value)
+			oldMin = left;
+	}
+	
+	return oldMin;
+}

@@ -7,7 +7,14 @@ void ConstruiesteElement(Element * e, int valoare, bool inList)
 	e->value = valoare;
 }
 
-bool Compara(Element * stanga, Element * dreapta)
+int  Compara(Element * stanga, Element * dreapta)
 {
-	return stanga->value < dreapta->value;
+	if (stanga->value > dreapta->value)
+		return 1;
+	else if (stanga->value < dreapta->value)
+	{
+		return -1;
+	}
+	else
+		return 0;
 }

@@ -1,7 +1,8 @@
 #pragma once
-
+#include "Element.h"
+#include "Nod.h"
 struct Nod {
-	int valoare;
+	Element* valoare;
 	Nod * urmator;
 	Nod* anterior;
 };

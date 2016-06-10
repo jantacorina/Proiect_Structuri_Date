@@ -1,10 +1,9 @@
 #pragma once
+#include"alloc.h"
 struct Element {
 	int value;
 	bool inList;
 };
-
-
 void ConstruiesteElement(Element* e,int, bool);
 
-bool Compara(Element* stanga,Element* dreapta);
+int Compara(Element* stanga,Element* dreapta);
