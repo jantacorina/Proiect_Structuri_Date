@@ -1,6 +1,12 @@
 #include "Queap.h"
 
 #define INFINIT 100000
+/// <summary>
+/// Comparaties implicita.Folosita in procesul de inserare,stergere
+/// </summary>
+/// <param name="av">Parametru din stanga.</param>
+/// <param name="bv">Parametrul din dreapta.</param>
+/// <returns>int.</returns>
 int comparatieImplicita(int av, int bv) {
 	if (av > bv)
 		return 1;
@@ -9,7 +15,10 @@ int comparatieImplicita(int av, int bv) {
 	return 0;
 }
 
-
+/// <summary>
+/// Initializeaza structura de date
+/// </summary>
+/// <param name="queap">The queap.</param>
 void init(Queap * queap)
 {
 	Initializare(&queap->lista_inlantuita);
@@ -17,17 +26,28 @@ void init(Queap * queap)
 	queap->n = 0;
 	queap->k = 0;
 }
-
+/// <summary>
+/// Inserts the specified queap.
+/// </summary>
+/// <param name="queap">The queap.</param>
+/// <param name="element">The element.</param>
+/// <returns>Element *.</returns>
 Element* Insert(Queap * queap, int element)
 {
+	// creez un nou element
 	Element *e = my_new(Element);
 	ConstruiesteElement(e, element, true);
+	// daca nu am niciun element atunci elementul ce urmeaza sa fie inserat devine minim
 	if (queap->n == 0)
 		queap->minimElementeT = e;
+	// inserez elementul in lista
 	Inserare(queap->lista_inlantuita, e);
+	//il compar cu minimul
 	if (Compara(e,queap->minimElementeT) == true)
 		queap->minimElementeT = e;
+	//incrementez numaru de elemente
 	queap->n++;
+	//returnez elementul inserat
 	return e;
 
 }
@@ -57,7 +77,9 @@ void Stergere(Queap* queap, Element* element)
 	}
 	else
 	{
+		//stergem elementul din arbore
 		StergeElement(queap->queap_arbore, element);
+		//decrementam nr de elemente totale sin din arbore
 		--queap->n;
 		--queap->k;
 	}
