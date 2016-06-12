@@ -27,4 +27,5 @@ int main()
 	Insert(q, 17);
 	Insert(q, 18);
 	Stergere(q, twoElement);
+	Afisare(q);
 }
